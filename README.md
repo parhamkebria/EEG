@@ -1,6 +1,4 @@
-# EEG
-
-## ElectroEncephaloGram
+# EEG: ElectroEncephaloGram
 
 A repositoruy for EEG data processing and analysis.
 
@@ -16,7 +14,7 @@ A repositoruy for EEG data processing and analysis.
 3. Implement preprocessing in notebooks with leakage-safe train/validation/test boundaries.
 4. Record per-subject performance, confidence intervals, and failure modes.
 
-## Step 2 implementation (in this repo)
+## Implementation
 
 Run preprocessing and a leakage-safe subject-wise split:
 
@@ -31,3 +29,14 @@ Generated files:
 - outputs/processed/val.csv
 - outputs/processed/test.csv
 - outputs/processed/summary.json
+
+## Known issues (shortcomings) of the dataset:
+
+- Extremely imbalanced multiclass target.
+  - Train imbalance is about 31.6x (largest vs smallest class), and many classes have very few examples. That crushes macro F1 even with class weights.
+- Too many classes for the available per-class signal.
+  - Solving a large multiclass problem with sparse support in many labels, so each one-vs-rest boundary is weak.
+- Group split is correct but makes generalization harder.
+  - Training on 21 subjects and tested on 5 unseen subjects. That is the right leakage-safe evaluation, but subject shift is large in EEG.
+- Features are coarse summaries.
+  - Current features are aggregate stats + bandpower snapshots. They may not capture temporal dynamics that separate many fine-grained labels
