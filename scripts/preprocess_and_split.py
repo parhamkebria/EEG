@@ -21,6 +21,10 @@ import numpy as np
 import pandas as pd
 
 
+# 12-bit signed ADC saturation limit for the EEG device (range: -2048 to +2047).
+# Samples at or above this value indicate amplifier clipping.
+ADC_POSITIVE_RAIL: float = 2047.0
+
 BAND_NAMES = [
     "delta",
     "theta",
@@ -130,7 +134,7 @@ def summarize_vector(values: Sequence[float], prefix: str) -> Dict[str, float]:
         f"{prefix}_q05": float(np.quantile(arr, 0.05)),
         f"{prefix}_q95": float(np.quantile(arr, 0.95)),
         f"{prefix}_abs_mean": float(np.mean(np.abs(arr))),
-        f"{prefix}_clip_ratio": float(np.mean(np.abs(arr) >= 2047.0)),
+        f"{prefix}_clip_ratio": float(np.mean(np.abs(arr) >= ADC_POSITIVE_RAIL)),
     }
 
 
