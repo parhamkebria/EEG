@@ -1,0 +1,74 @@
+{
+  "config": {
+    "data_path": "outputs/processed/features_with_split.csv",
+    "group_col": "id",
+    "label_col": "label",
+    "split_col": "split",
+    "n_splits": 3,
+    "imbalance_threshold": 2.0,
+    "seed": 42
+  },
+  "data": {
+    "rows_total": 9959,
+    "rows_train": 7058,
+    "rows_test": 1628,
+    "feature_count": 21,
+    "imbalance_ratio": 31.61904761904762,
+    "class_weight_enabled": true
+  },
+  "baseline": {
+    "cv_summary": {
+      "accuracy_mean": 0.09352670752618514,
+      "accuracy_std": 0.0003170416360809078,
+      "f1_macro_mean": 0.002553060192821444,
+      "f1_macro_std": 7.913581608445619e-06,
+      "balanced_accuracy_mean": 0.014925373134328358,
+      "balanced_accuracy_std": 0.0
+    },
+    "test": {
+      "accuracy": 0.09152334152334152,
+      "f1_macro": 0.0025029607169554592,
+      "balanced_accuracy": 0.014925373134328358
+    }
+  },
+  "candidates": {
+    "logreg": {
+      "cv_summary": {
+        "accuracy_mean": 0.043169714223564935,
+        "accuracy_std": 0.007973019993131448,
+        "f1_macro_mean": 0.019269023848763406,
+        "f1_macro_std": 0.004321967057480243,
+        "balanced_accuracy_mean": 0.0299406350174164,
+        "balanced_accuracy_std": 0.005475746613658888
+      },
+      "test": {
+        "accuracy": 0.042997542997543,
+        "f1_macro": 0.009698430993402587,
+        "balanced_accuracy": 0.01903467735343789
+      }
+    },
+    "random_forest": {
+      "cv_summary": {
+        "accuracy_mean": 0.04625459905311777,
+        "accuracy_std": 0.003448604469509472,
+        "f1_macro_mean": 0.02493097183464635,
+        "f1_macro_std": 0.003711915223895998,
+        "balanced_accuracy_mean": 0.028906095897424114,
+        "balanced_accuracy_std": 0.004091569511794256
+      },
+      "test": {
+        "accuracy": 0.05221130221130221,
+        "f1_macro": 0.019545356273673074,
+        "balanced_accuracy": 0.02092457273688023
+      }
+    }
+  },
+  "selected_model": {
+    "name": "random_forest",
+    "test": {
+      "accuracy": 0.05221130221130221,
+      "f1_macro": 0.019545356273673074,
+      "balanced_accuracy": 0.02092457273688023
+    }
+  }
+}
