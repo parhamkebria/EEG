@@ -6,8 +6,8 @@ A repositoruy for EEG data processing and analysis.
 
 ## Workflow Starter
 
-- EEG data science playbook: [docs/eeg-data-science-playbook.md](docs/eeg-data-science-playbook.md)
-- Model report template: [templates/model-report-template.md](templates/model-report-template.md)
+- [EEG data science playbook](docs/eeg-data-science-playbook.md)
+- [Model report template](templates/model-report-template.md)
 
 ## Step-by-step quick start
 
