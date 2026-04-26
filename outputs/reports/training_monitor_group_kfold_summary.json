@@ -1,0 +1,12 @@
+{
+  "splitter": "StratifiedGroupKFold",
+  "n_folds_completed": 5,
+  "f1_macro_mean": 0.06484387683049923,
+  "f1_macro_std": 0.006614311780582743,
+  "accuracy_mean": 0.12747263891989022,
+  "accuracy_std": 0.016531000526758797,
+  "auc_macro_ovr_mean": 0.5890872296345004,
+  "auc_macro_ovr_std": 0.029203639123140935,
+  "top_2_accuracy_mean": 0.23174363373742404,
+  "top_3_accuracy_mean": 0.32934647184385063
+}
