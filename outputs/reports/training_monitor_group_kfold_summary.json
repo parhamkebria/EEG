@@ -1,12 +1,12 @@
 {
   "splitter": "StratifiedGroupKFold",
   "n_folds_completed": 5,
-  "f1_macro_mean": 0.054986558333388634,
-  "f1_macro_std": 0.00789802296130938,
-  "accuracy_mean": 0.12202533802076573,
-  "accuracy_std": 0.016280269287460472,
-  "auc_macro_ovr_mean": 0.5807945210443773,
-  "auc_macro_ovr_std": 0.02720986859608511,
-  "top_2_accuracy_mean": 0.23985175841796766,
-  "top_3_accuracy_mean": 0.32738106903720354
+  "f1_macro_mean": 0.04014412159381166,
+  "f1_macro_std": 0.011348851516738008,
+  "accuracy_mean": 0.11140429311568203,
+  "accuracy_std": 0.008616447496068068,
+  "auc_macro_ovr_mean": 0.5558988667781418,
+  "auc_macro_ovr_std": 0.008473373020360563,
+  "top_2_accuracy_mean": 0.20122222630101408,
+  "top_3_accuracy_mean": 0.28937520237272396
 }
