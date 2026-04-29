@@ -62,8 +62,8 @@
         "readyRound4": "readyRound",
         "readyRound5": "readyRound"
     },
-    "8-classes": 8,
-    "labels_8": {
+    "9-classes": 9,
+    "labels_9": {
         "blink1": "blink",
         "blink2": "blink",
         "blink3": "blink",
@@ -115,6 +115,11 @@
         "colorRound5-4": "colorRound",
         "colorRound5-5": "colorRound",
         "colorRound5-6": "colorRound",
+        "blinkInstruction": "Instruction",
+        "relaxInstruction": "Instruction",
+        "mathInstruction": "Instruction",
+        "musicInstruction": "Instruction",
+        "videoInstruction": "Instruction",
         "thinkOfItemsInstruction-ver1": "Instruction",
         "thinkOfItemsInstruction-ver2": "Instruction",
         "colorInstruction1": "Instruction",
