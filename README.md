@@ -84,3 +84,13 @@ Why it matters: this distribution makes the long-tail label problem explicit and
 ![Model output sample](outputs/output.png)
 
 Why it matters: this example output shows the practical classification behavior of the developed model on the prepared feature pipeline.
+
+## IMAGINATION
+
+Class: Relax
+
+![Relax](relax.png)
+
+Class: Video
+
+![Video](video.png)
