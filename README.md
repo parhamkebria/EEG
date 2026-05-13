@@ -95,4 +95,4 @@ Class: Relax
 
 Class: Video
 
-![Video](video.png)
+![Video](instruction.png)
