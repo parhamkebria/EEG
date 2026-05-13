@@ -93,6 +93,6 @@ Class: Relax
 
 ![Relax](relax.png)
 
-Class: Video
+Class: Instruction
 
 ![Video](instruction.png)
