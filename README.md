@@ -87,6 +87,8 @@ Why it matters: this example output shows the practical classification behavior 
 
 ## IMAGINATION
 
+Imagination converts EEG raw values, statistical features, power bands, and Fourier transforms into visual representations. Then, trains a convolutional neural network to classify these images into mental states. The goal is to leverage spatial patterns in the data that may be more easily captured by CNNs.
+
 Class: Relax
 
 ![Relax](relax.png)
