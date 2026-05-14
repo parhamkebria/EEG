@@ -9,14 +9,13 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import GroupShuffleSplit
 from sklearn.metrics import f1_score, classification_report, ConfusionMatrixDisplay
-import ptitprince as pt
 import matplotlib.pyplot as plt
 import seaborn as sns
 import tqdm
 
 from utils import *
 from config import *
-from imaginator import imaginator
+from imaginator import *
 
 class EEGMatrixDataset(Dataset):
     def __init__(self, X, y):

@@ -2,6 +2,7 @@ import json
 import torch
 from pathlib import Path
 
+scale = 16
 batch_size = 32
 epochs = 20
 dropout_rate = 0.3
