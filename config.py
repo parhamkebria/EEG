@@ -1,6 +1,10 @@
+import os
 import json
 import torch
 from pathlib import Path
+from datetime import datetime
+
+TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 scale = 16
 batch_size = 32
@@ -12,10 +16,20 @@ num_workers = 4
 patience = 5
 min_delta = 1e-4
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+SINGLE_SCALE = 16
+SINGLE_BATCH_SIZE = 32
+
+DOUBLE_SCALE = 16
+DOUBLE_BATCH_SIZE = 32
 
 RAW_PATH = Path("EEG/eeg-data.csv")
 FULL_PATH = Path("EEG/eeg_data_with_features.csv")
+
+os.makedirs(f"outputs/results/{TIMESTAMP}", exist_ok=True)
+CONFIG_PATH = Path(f"outputs/results/{TIMESTAMP}/config_{TIMESTAMP}.json")
+CHEKPOINT_PATH = Path(f"outputs/results/{TIMESTAMP}/best_model_checkpoint_{TIMESTAMP}.pth")
 
 POWER_BANDS = [
     'delta',

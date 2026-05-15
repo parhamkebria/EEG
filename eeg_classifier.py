@@ -17,29 +17,18 @@ from utils import *
 from config import *
 from imaginator import *
 
-class EEGMatrixDataset(Dataset):
-    def __init__(self, X, y):
-        self.X = torch.tensor(X, dtype=torch.float32)
-        self.y = torch.tensor(y, dtype=torch.long)
-
-    def __len__(self):
-        return len(self.y)
-
-    def __getitem__(self, idx):
-        return self.X[idx], self.y[idx]
-
 class EEGClassifier():
     class EEGCNNClassifier(nn.Module):
         def __init__(self, in_channels=6, num_classes=9):
             super().__init__()
             self.features = nn.Sequential(
-                nn.Conv2d(in_channels, 32,  kernel_size=3, padding=1),  # (B,32,8,8)
+                nn.Conv2d(in_channels, 32,  kernel_size=3, padding=1),
                 nn.BatchNorm2d(32),  nn.ReLU(),
-                nn.Conv2d(32,         64,  kernel_size=3, padding=1),   # (B,64,8,8)
+                nn.Conv2d(32,         64,  kernel_size=3, padding=1),
                 nn.BatchNorm2d(64),  nn.ReLU(),
-                nn.Conv2d(64,         128, kernel_size=3, padding=1),   # (B,128,8,8)
+                nn.Conv2d(64,         128, kernel_size=3, padding=1),
                 nn.BatchNorm2d(128), nn.ReLU(),
-                nn.AdaptiveAvgPool2d(1),                                # (B,128,1,1)
+                nn.AdaptiveAvgPool2d(1),
             )
             self.classifier = nn.Sequential(
                 nn.Flatten(),
@@ -134,11 +123,11 @@ class EEGClassifier():
         num_classes = len(np.unique(y_train))
         counts = np.bincount(y_train, minlength=num_classes).astype(float)
         cw = torch.tensor(1.0 / np.maximum(counts, 1), dtype=torch.float32)
-        cw = (cw / cw.sum() * num_classes).to(device)
+        cw = (cw / cw.sum() * num_classes).to(DEVICE)
         return train_loader, val_loader, num_classes, cw, le
 
     def build_model(self, input_channels, spatial_size, num_classes, cw):
-        self.model     = self.EEGCNNClassifier(in_channels=input_channels, num_classes=num_classes).to(device)
+        self.model     = self.EEGCNNClassifier(in_channels=input_channels, num_classes=num_classes).to(DEVICE)
         self.optimizer = optim.Adam(self.model.parameters(), lr=3e-4, weight_decay=1e-4)
         self.criterion = nn.CrossEntropyLoss(weight=cw)
         self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
@@ -244,7 +233,6 @@ class EEGClassifier():
         print(classification_report(self.final_targets, self.final_preds, **report_kwargs))
 
     def reaulrs(self):
-        # ── Training curves ───────────────────────────────────────────────
         fig, axs = plt.subplots(1, 2, figsize=(12, 4))
 
         axs[0].plot(self.history['train_loss'], label='Train')
@@ -260,7 +248,6 @@ class EEGClassifier():
         plt.tight_layout()
         plt.show()
 
-        # ── Confusion matrix ──────────────────────────────────────────────
         ConfusionMatrixDisplay.from_predictions(
             self.final_targets, self.final_preds,
             display_labels=self.le.classes_,
@@ -288,11 +275,11 @@ class EEGClassifier():
             epochs=epochs,
             learning_rate=learning_rate,
             weight_decay=weight_decay,
-            device=device,
+            device=DEVICE,
         )
-        self.evaluate(self.model, val_loader, device=device, le=self.le)
+        self.evaluate(self.model, val_loader, device=DEVICE, le=self.le)
         self.reaulrs()
 
-if __name__ == "__main__":
-    eeg_classifier = EEGClassifier()
-    eeg_classifier.main()
+# if __name__ == "__main__":
+#     eeg_classifier = EEGClassifier()
+#     eeg_classifier.main()
