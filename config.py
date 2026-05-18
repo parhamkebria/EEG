@@ -7,8 +7,8 @@ from datetime import datetime
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 scale = 16
-batch_size = 32
 epochs = 20
+batch_size = 32
 dropout_rate = 0.3
 learning_rate = 1e-3
 weight_decay = 1e-5
@@ -28,7 +28,9 @@ RAW_PATH = Path("EEG/eeg-data.csv")
 FULL_PATH = Path("EEG/eeg_data_with_features.csv")
 
 os.makedirs(f"outputs/results/{TIMESTAMP}", exist_ok=True)
+ARCH_PATH = Path(f"outputs/results/{TIMESTAMP}/arch_{TIMESTAMP}.txt")
 CONFIG_PATH = Path(f"outputs/results/{TIMESTAMP}/config_{TIMESTAMP}.json")
+LOGGING_PATH = Path(f"outputs/results/{TIMESTAMP}/training_log_{TIMESTAMP}.csv")
 CHEKPOINT_PATH = Path(f"outputs/results/{TIMESTAMP}/best_model_checkpoint_{TIMESTAMP}.pth")
 
 POWER_BANDS = [

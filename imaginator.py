@@ -1,3 +1,4 @@
+import csv
 import torch
 import torchinfo
 import torch.nn as nn
@@ -90,6 +91,8 @@ class EEGMatrixDataset(Dataset):
             x = F.interpolate(x, size=(self.scale, self.scale), mode='nearest')
         return x.squeeze(0), self.y[idx]                        # (C, SCALE, SCALE)
 
+#####################################
+# The main EEG classifier class:
 class EEGClassifier():
     class EEGCNN(nn.Module):
         def __init__(self, dropout_rate, in_channels=12, num_classes=9):
@@ -127,7 +130,7 @@ class EEGClassifier():
         return eeg_data
 
     @classmethod
-    def data_loader( data, raw_features, power_bands, fft_features, batch_size=batch_size, scale=scale, num_workers=num_workers):
+    def data_loader(data, raw_features, power_bands, fft_features, batch_size=batch_size, scale=scale, num_workers=num_workers):
         X_img = imaginator(data, raw_features, power_bands, fft_features)
         le = LabelEncoder()
         y = le.fit_transform(data['label'].astype(str).values)
@@ -174,7 +177,9 @@ class EEGClassifier():
         print("-" * 20 + "DataLoader ready" + "-" * 20)
         return train_loader, val_loader, num_classes, cw, le
     
-    def build_model(self, input_channels, spatial_size, num_classes, cw, learning_rate, weight_decay, dropout_rate):
+    def build_model(self, input_channels, spatial_size, num_classes, cw, learning_rate, weight_decay, dropout_rate, 
+                    config_path=CONFIG_PATH,
+                    arch_path=ARCH_PATH):
         self.model = self.EEGCNN(dropout_rate, in_channels=input_channels, num_classes=num_classes).to(DEVICE)
         self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate, weight_decay=weight_decay)
         self.criterion = nn.CrossEntropyLoss(weight=cw)
@@ -183,6 +188,12 @@ class EEGClassifier():
 
         print(f"\nTrainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad):,}")
         print(torchinfo.summary(self.model, input_size=(1, input_channels, spatial_size, spatial_size), verbose=0))
+        # Save model configuration
+        self.save_config(config_path)
+        with open(arch_path, 'w') as f:
+            f.write(f"Trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad):,}")
+            f.write("\n" + torchinfo.summary(self.model, input_size=(1, input_channels, spatial_size, spatial_size), verbose=0).pformat())
+        print(f"\nModel architecture saved to {arch_path}")
         print("-" * 20 + "Model built" + "-" * 20)
         return self.model, self.optimizer, self.criterion, self.scheduler
 
@@ -207,74 +218,83 @@ class EEGClassifier():
         best_weights = None
         patience_counter = 0
         
-        # Training loop
-        for epoch in range(1, epochs + 1):
-            start_time = time()
-            self.model.train()
-            tr_loss, tr_preds, tr_targets = 0.0, [], []
-            for xb, yb in train_loader:
-                xb, yb = xb.to(device), yb.to(device)
-                self.optimizer.zero_grad()
-                logits = self.model(xb)
-                loss   = self.criterion(logits, yb)
-                loss.backward()
-                nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
-                self.optimizer.step()
-                tr_loss += loss.item() * len(yb)
-                tr_preds.extend(logits.argmax(1).detach().cpu().numpy())
-                tr_targets.extend(yb.cpu().numpy())
-            
-            # Compute epoch metrics
-            tr_loss /= len(train_loader.dataset)
-            tr_f1 = f1_score(tr_targets, tr_preds, average='macro', zero_division=0)
-            
-            # Validation step
-            self.model.eval()
-            va_loss, va_preds, va_targets = 0.0, [], []
-            with torch.no_grad():
-                for xb, yb in val_loader:
+        # Open CSV file for logging
+        with open(LOGGING_PATH, mode='w', newline='') as log_file:
+            log_writer = csv.writer(log_file)
+            log_writer.writerow(['epoch', 'train_loss', 'train_f1_macro', 'val_loss', 'val_f1_macro', 'learning_rate'])
+        
+            # Training loop
+            for epoch in range(1, epochs + 1):
+                start_time = time()
+                self.model.train()
+                tr_loss, tr_preds, tr_targets = 0.0, [], []
+                for xb, yb in train_loader:
                     xb, yb = xb.to(device), yb.to(device)
-                    logits  = self.model(xb)
-                    va_loss += self.criterion(logits, yb).item() * len(yb)
-                    va_preds.extend(logits.argmax(1).cpu().numpy())
-                    va_targets.extend(yb.cpu().numpy())
+                    self.optimizer.zero_grad()
+                    logits = self.model(xb)
+                    loss   = self.criterion(logits, yb)
+                    loss.backward()
+                    nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+                    self.optimizer.step()
+                    tr_loss += loss.item() * len(yb)
+                    print(f"\rEpoch {epoch:3d} | Batch loss: {loss.item():.3f}", end="")
+                    tr_preds.extend(logits.argmax(1).detach().cpu().numpy())
+                    tr_targets.extend(yb.cpu().numpy())
+                
+                # Compute epoch metrics
+                tr_loss /= len(train_loader.dataset)
+                tr_f1 = f1_score(tr_targets, tr_preds, average='macro', zero_division=0)
+                
+                # Validation step
+                self.model.eval()
+                va_loss, va_preds, va_targets = 0.0, [], []
+                with torch.no_grad():
+                    for xb, yb in val_loader:
+                        xb, yb = xb.to(device), yb.to(device)
+                        logits  = self.model(xb)
+                        va_loss += self.criterion(logits, yb).item() * len(yb)
+                        va_preds.extend(logits.argmax(1).cpu().numpy())
+                        va_targets.extend(yb.cpu().numpy())
 
-            va_loss /= len(val_loader.dataset)
-            va_f1    = f1_score(va_targets, va_preds, average='macro', zero_division=0)
-            self.scheduler.step(va_f1)
-            self.history['train_loss'].append(tr_loss)
-            self.history['val_loss'].append(va_loss)
-            self.history['train_f1'].append(tr_f1)
-            self.history['val_f1'].append(va_f1)
+                va_loss /= len(val_loader.dataset)
+                va_f1    = f1_score(va_targets, va_preds, average='macro', zero_division=0)
+                self.scheduler.step(va_f1)
+                self.history['train_loss'].append(tr_loss)
+                self.history['val_loss'].append(va_loss)
+                self.history['train_f1'].append(tr_f1)
+                self.history['val_f1'].append(va_f1)
 
-            improved = va_f1 > best_f1 + min_delta
-            if improved:
-                best_f1, best_epoch = va_f1, epoch
-                best_weights = {k: v.cpu().clone() for k, v in self.model.state_dict().items()}
-                torch.save(
-                {
-                    'epoch': epoch,
-                    'val_f1_macro': float(va_f1),
-                    'model_state_dict': best_weights,
-                },
-                CHEKPOINT_PATH,
-                )
-                patience_counter = 0
-            else:
-                patience_counter += 1
+                improved = va_f1 > best_f1 + min_delta
+                if improved:
+                    best_f1, best_epoch = va_f1, epoch
+                    best_weights = {k: v.cpu().clone() for k, v in self.model.state_dict().items()}
+                    torch.save(
+                    {
+                        'epoch': epoch,
+                        'val_f1_macro': float(va_f1),
+                        'model_state_dict': best_weights,
+                    },
+                    CHEKPOINT_PATH,
+                    )
+                    patience_counter = 0
+                else:
+                    patience_counter += 1
 
-            tag = '  <- best' if improved else ''
-            print(f"Epoch {epoch:3d}/{epochs} | "
-                f"TLoss: {tr_loss:.4f}  TF1: {tr_f1:.4f} | "
-                f"VLoss: {va_loss:.4f}  VF1: {va_f1:.4f} | "
-                f"LR: {self.optimizer.param_groups[0]['lr']:.2e}{tag}")
+                tag = '  <- best' if improved else ''
+                print(f"\nEpoch {epoch:3d}/{epochs} | "
+                    f"TLoss: {tr_loss:.3f}  TF1: {tr_f1:.3f} | "
+                    f"VLoss: {va_loss:.3f}  VF1: {va_f1:.3f} | "
+                    f"LR: {self.optimizer.param_groups[0]['lr']:.2e} | "
+                    f"completed in {(time() - start_time):.1f} seconds.{tag}")
+                log_writer.writerow([epoch, tr_loss, tr_f1, va_loss, va_f1, self.optimizer.param_groups[0]['lr']])
+                log_file.flush()
 
-            print(f"Epoch {epoch} completed in {(time() - start_time):.1f} seconds.")
-
-            if patience_counter >= patience:
-                print(f"\nEarly stop at epoch {epoch}  "
-                    f"(best: epoch {best_epoch}, val F1: {best_f1:.4f})")
-                break
+                if patience_counter >= patience:
+                    print(f"\nEarly stop at epoch {epoch}  "
+                        f"(best: epoch {best_epoch}, val F1: {best_f1:.4f})")
+                    break
+        
+        log_file.close()
         
         if best_weights is None:
             best_weights = {k: v.cpu().clone() for k, v in self.model.state_dict().items()}
