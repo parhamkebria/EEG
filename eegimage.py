@@ -4,7 +4,7 @@ import torchinfo
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-from torch import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import GroupShuffleSplit
 from sklearn.metrics import f1_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
@@ -14,7 +14,7 @@ from time import time
 from  utils import *
 from config import *
 
-def imaginator(data, raw_features, power_bands, fft_features):
+def eegimage(data, raw_features, power_bands, fft_features):
     raw_cols = list(raw_features[1:-1])
     power_cols = list(power_bands)
     fft_cols = list(fft_features)
@@ -130,8 +130,11 @@ class EEGClassifier():
         return eeg_data
 
     @classmethod
-    def data_loader(data, raw_features, power_bands, fft_features, batch_size=batch_size, scale=scale, num_workers=num_workers):
-        X_img = imaginator(data, raw_features, power_bands, fft_features)
+    def data_loader(cls, data, raw_features, power_bands, fft_features, 
+                    batch_size=BATCH_SIZE,
+                    scale=SCALE,
+                    num_workers=NUM_WORKERS):
+        X_img = eegimage(data, raw_features, power_bands, fft_features)
         le = LabelEncoder()
         y = le.fit_transform(data['label'].astype(str).values)
         groups = data['id'].astype(str).values
@@ -264,7 +267,7 @@ class EEGClassifier():
                 self.history['train_f1'].append(tr_f1)
                 self.history['val_f1'].append(va_f1)
 
-                improved = va_f1 > best_f1 + min_delta
+                improved = va_f1 > best_f1 + MIN_DELTA
                 if improved:
                     best_f1, best_epoch = va_f1, epoch
                     best_weights = {k: v.cpu().clone() for k, v in self.model.state_dict().items()}
@@ -274,7 +277,7 @@ class EEGClassifier():
                         'val_f1_macro': float(va_f1),
                         'model_state_dict': best_weights,
                     },
-                    CHEKPOINT_PATH,
+                    CHECKPOINT_PATH,
                     )
                     patience_counter = 0
                 else:
@@ -289,7 +292,7 @@ class EEGClassifier():
                 log_writer.writerow([epoch, tr_loss, tr_f1, va_loss, va_f1, self.optimizer.param_groups[0]['lr']])
                 log_file.flush()
 
-                if patience_counter >= patience:
+                if patience_counter >= PATIENCE:
                     print(f"\nEarly stop at epoch {epoch}  "
                         f"(best: epoch {best_epoch}, val F1: {best_f1:.4f})")
                     break
@@ -301,7 +304,7 @@ class EEGClassifier():
 
         self.model.load_state_dict({k: v.to(device) for k, v in best_weights.items()})
         print(f"\nRestored best checkpoint — Val F1-macro: {best_f1:.4f}")
-        print(f"Saved/loaded checkpoint path: {CHEKPOINT_PATH}")
+        print(f"Saved/loaded checkpoint path: {CHECKPOINT_PATH}")
 
         return self.model
     
@@ -331,17 +334,17 @@ class EEGClassifier():
     def save_config(self, config_path: Path = CONFIG_PATH):
         config_data = {
             'timestamp': self.timestamp,
-            'batch_size': batch_size,
-            'epochs': epochs,
-            'dropout_rate': dropout_rate,
-            'learning_rate': learning_rate,
-            'weight_decay': weight_decay,
-            'num_workers': num_workers,
-            'patience': patience,
-            'min_delta': min_delta,
+            'batch_size': BATCH_SIZE,
+            'epochs': EPOCHS,
+            'dropout_rate': DROPOUT_RATE,
+            'learning_rate': LEARNING_RATE,
+            'weight_decay': WEIGHT_DECAY,
+            'num_workers': NUM_WORKERS,
+            'patience': PATIENCE,
+            'min_delta': MIN_DELTA,
             'DEVICE': str(DEVICE),
-            'SINGLE_SCALE': SINGLE_SCALE,
-            'SINGLE_BATCH_SIZE': SINGLE_BATCH_SIZE,
+            'SINGLE_SCALE': SCALE,
+            'SINGLE_BATCH_SIZE': BATCH_SIZE,
         }
         with open(config_path, 'w') as f:
             json.dump(config_data, f, indent=4)
@@ -359,10 +362,10 @@ class EEGClassifier():
         plt.plot(epochs, self.history['val_f1'], label='Val F1-macro')
         plt.xlabel('Epoch'); plt.ylabel('F1-macro'); plt.title('F1-macro over Epochs'); plt.legend()
         plt.tight_layout()
-        plt.savefig(f"training_results_{self.timestamp}.png", dpi=300)
+        plt.savefig(f"{CHECKPOINT_PATH.parent}/training_results_{self.timestamp}.png", dpi=300)
         
         if self.disp is not None:
             self.disp.plot(cmap='Blues', xticks_rotation=90, values_format='.1f')
             plt.title('CNN Confusion Matrix - val set (normalized)')
             plt.tight_layout()
-            plt.savefig(f"ConfusionMatrix_{self.timestamp}.png", dpi=300)
+            plt.savefig(f"{CHECKPOINT_PATH.parent}/ConfusionMatrix_{self.timestamp}.png", dpi=300)

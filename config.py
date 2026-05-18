@@ -6,23 +6,31 @@ from datetime import datetime
 
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-scale = 16
-epochs = 20
-batch_size = 32
-dropout_rate = 0.3
-learning_rate = 1e-3
-weight_decay = 1e-5
-num_workers = 4
-patience = 5
-min_delta = 1e-4
-
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-SINGLE_SCALE = 16
-SINGLE_BATCH_SIZE = 32
+DUAL = False
+SCALE = 16
+EPOCHS = 20
+BATCH_SIZE = 32
+DROPOUT_RATE = 0.3
+LEARNING_RATE = 1e-3
+WEIGHT_DECAY = 1e-5
+NUM_WORKERS = 4
+PATIENCE = 5
+MIN_DELTA = 1e-4
 
 DOUBLE_SCALE = 16
 DOUBLE_BATCH_SIZE = 32
+INPUT_CHANNELS = 12
+
+if DUAL:
+    SCALE = DOUBLE_SCALE
+    BATCH_SIZE = DOUBLE_BATCH_SIZE
+    INPUT_CHANNELS = 6
+
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+DEVICE_ID = 0 # only if cuda available, otherwise ignored
+if DEVICE.type == "cuda":
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(DEVICE_ID)
+    torch.cuda.set_device(DEVICE_ID)
 
 RAW_PATH = Path("EEG/eeg-data.csv")
 FULL_PATH = Path("EEG/eeg_data_with_features.csv")
@@ -31,7 +39,7 @@ os.makedirs(f"outputs/results/{TIMESTAMP}", exist_ok=True)
 ARCH_PATH = Path(f"outputs/results/{TIMESTAMP}/arch_{TIMESTAMP}.txt")
 CONFIG_PATH = Path(f"outputs/results/{TIMESTAMP}/config_{TIMESTAMP}.json")
 LOGGING_PATH = Path(f"outputs/results/{TIMESTAMP}/training_log_{TIMESTAMP}.csv")
-CHEKPOINT_PATH = Path(f"outputs/results/{TIMESTAMP}/best_model_checkpoint_{TIMESTAMP}.pth")
+CHECKPOINT_PATH = Path(f"outputs/results/{TIMESTAMP}/best_model_checkpoint_{TIMESTAMP}.pth")
 
 POWER_BANDS = [
     'delta',
