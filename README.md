@@ -69,19 +69,19 @@ The figures below provide a quick snapshot of what the trained pipeline is compe
 
 ### Class weights
 
-![Class weights](outputs/class_weights.png)
+![Class weights](class_weights.png)
 
 Why it matters: this plot highlights how strongly minority classes must be upweighted so the loss function does not ignore them.
 
 ### Label distribution
 
-![Label distribution](outputs/labels_distribution.png)
+![Label distribution](labels_distribution.png)
 
 Why it matters: this distribution makes the long-tail label problem explicit and explains why macro-level metrics are difficult to optimize.
 
 ### Model output sample
 
-![Model output sample](outputs/output.png)
+![Model output sample](output.png)
 
 Why it matters: this example output shows the practical classification behavior of the developed model on the prepared feature pipeline.
 
