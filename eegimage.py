@@ -109,9 +109,10 @@ class EEGMatrixDataset(Dataset):
 #####################################
 # The main EEG classifier class:
 class EEGClassifier():
-    def __init__(self):
+    def __init__(self, cfg=None):
         self.timestamp = TIMESTAMP
         self.disp = None
+        self.cfg = cfg or Config()
     
     class EEGCNN(nn.Module):
         def __init__(self, dropout_rate, in_channels=12, num_classes=9):
@@ -230,7 +231,7 @@ class EEGClassifier():
             cw=cw,
             learning_rate=learning_rate,
             weight_decay=weight_decay,
-            dropout_rate=0.5
+            dropout_rate=self.cfg.dropout_rate
         )
         
         best_f1 = float('-inf')
@@ -309,7 +310,7 @@ class EEGClassifier():
                 log_writer.writerow([epoch, tr_loss, tr_f1, va_loss, va_f1, self.optimizer.param_groups[0]['lr']])
                 log_file.flush()
 
-                if patience_counter >= PATIENCE:
+                if self.cfg.stop_early and patience_counter >= self.cfg.patience:
                     print(f"\nEarly stop at epoch {epoch}  "
                         f"(best: epoch {best_epoch}, val F1: {best_f1:.4f})")
                     break
@@ -348,23 +349,23 @@ class EEGClassifier():
         _cm = confusion_matrix(va_targets, va_preds, normalize='true')
         display_labels = le.classes_ if le is not None else None
         self.disp = ConfusionMatrixDisplay(confusion_matrix=_cm, display_labels=display_labels)
-        self.disp.plot(xticks_rotation=90, values_format='.1f', cmap='Blues')
+        # self.disp.plot(xticks_rotation=90, values_format='.1f', cmap='Blues')
         print("-" * 20 + f"Evaluation completed in {(time() - start_time):.1f} seconds." + "-" * 20)
 
     def save_config(self, config_path: Path = CONFIG_PATH):
         config_data = {
             'timestamp': self.timestamp,
-            'batch_size': BATCH_SIZE,
-            'epochs': EPOCHS,
-            'dropout_rate': DROPOUT_RATE,
-            'learning_rate': LEARNING_RATE,
-            'weight_decay': WEIGHT_DECAY,
-            'num_workers': NUM_WORKERS,
-            'patience': PATIENCE,
-            'min_delta': MIN_DELTA,
-            'DEVICE': str(DEVICE),
-            'SINGLE_SCALE': SCALE,
-            'SINGLE_BATCH_SIZE': BATCH_SIZE,
+            'batch_size': self.cfg.batch_size,
+            'epochs': self.cfg.epochs,
+            'dropout_rate': self.cfg.dropout_rate,
+            'learning_rate': self.cfg.learning_rate,
+            'weight_decay': self.cfg.weight_decay,
+            'num_workers': self.cfg.num_workers,
+            'patience': self.cfg.patience,
+            'min_delta': self.cfg.min_delta,
+            'DEVICE': str(self.cfg.device_id),
+            'SINGLE_SCALE': self.cfg.scale,
+            'SINGLE_BATCH_SIZE': self.cfg.batch_size,
         }
         with open(config_path, 'w') as f:
             json.dump(config_data, f, indent=4)
@@ -382,10 +383,10 @@ class EEGClassifier():
         plt.plot(epochs, self.history['val_f1'], label='Val F1-macro')
         plt.xlabel('Epoch'); plt.ylabel('F1-macro'); plt.title('F1-macro over Epochs'); plt.legend()
         plt.tight_layout()
-        plt.savefig(f"{CHECKPOINT_PATH.parent}/training_results_{self.timestamp}.png", dpi=300)
+        plt.savefig(f"{RESULTS_PATH.parent}/training_results_{self.timestamp}.png", dpi=300)
         
         if self.disp is not None:
             self.disp.plot(cmap='Blues', xticks_rotation=90, values_format='.1f')
             plt.title('CNN Confusion Matrix - val set (normalized)')
             plt.tight_layout()
-            plt.savefig(f"{CHECKPOINT_PATH.parent}/ConfusionMatrix_{self.timestamp}.png", dpi=300)
+            plt.savefig(f"{RESULTS_PATH.parent}/ConfusionMatrix_{self.timestamp}.png", dpi=300)

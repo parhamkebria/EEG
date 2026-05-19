@@ -3,6 +3,7 @@ import json
 import torch
 from pathlib import Path
 from datetime import datetime
+from dataclasses import dataclass
 
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 
@@ -16,6 +17,7 @@ WEIGHT_DECAY = 1e-5
 NUM_WORKERS = 4
 PATIENCE = 5
 MIN_DELTA = 1e-4
+STOP_EARLY = True
 
 DOUBLE_SCALE = 16
 DOUBLE_BATCH_SIZE = 32
@@ -31,6 +33,23 @@ DEVICE_ID = 0 # only if cuda available, otherwise ignored
 if DEVICE.type == "cuda":
     os.environ["CUDA_VISIBLE_DEVICES"] = str(DEVICE_ID)
     torch.cuda.set_device(DEVICE_ID)
+
+@dataclass
+class Config:
+    scale: int = SCALE
+    epochs: int = EPOCHS
+    batch_size: int = BATCH_SIZE
+    dropout_rate: float = DROPOUT_RATE
+    learning_rate: float = LEARNING_RATE
+    weight_decay: float = WEIGHT_DECAY
+    num_workers: int = NUM_WORKERS
+    patience: int = PATIENCE
+    min_delta: float = MIN_DELTA
+    device_id: int = DEVICE_ID
+    dual: bool = DUAL
+    double_scale: int = DOUBLE_SCALE
+    double_batch_size: int = DOUBLE_BATCH_SIZE
+    stop_early: bool = STOP_EARLY
 
 RAW_PATH = Path("EEG/eeg-data.csv")
 FULL_PATH = Path("EEG/eeg_data_with_features.csv")
