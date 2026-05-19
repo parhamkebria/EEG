@@ -213,12 +213,12 @@ class EEGClassifier():
             self.optimizer, mode='max', factor=0.5, patience=5, min_lr=1e-5)
 
         print(f"\nTrainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad):,}")
-        print(torchinfo.summary(self.model, input_size=(1, input_channels, spatial_size, spatial_size), verbose=0))
+        model_summary = torchinfo.summary(self.model, input_size=(1, input_channels, spatial_size, spatial_size), verbose=0)
+        print(model_summary)
         # Save model configuration
-        with open(arch_path, 'w') as f:
+        with open(arch_path, 'w', encoding='utf-8') as f:
             f.write(f"Trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad):,}")
-            f.write("\n" + str(torchinfo.summary(self.model, input_size=(1, input_channels, spatial_size, spatial_size), verbose=0)))
-            f.close()
+            f.write("\n" + str(model_summary))
         self.save_config(config_path)
         print(f"Model architecture saved to {arch_path}")
         print("-" * 20 + "Model built" + "-" * 20)
