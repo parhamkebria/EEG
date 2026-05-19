@@ -206,6 +206,7 @@ class EEGClassifier():
     def build_model(self, input_channels, spatial_size, num_classes, cw, learning_rate, weight_decay, dropout_rate, 
                     config_path=CONFIG_PATH,
                     arch_path=ARCH_PATH):
+        arch_path.parent.mkdir(parents=True, exist_ok=True)
         self.model = self.EEGCNN(dropout_rate, in_channels=input_channels, num_classes=num_classes).to(self.device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate, weight_decay=weight_decay)
         self.criterion = nn.CrossEntropyLoss(weight=cw.to(self.device))

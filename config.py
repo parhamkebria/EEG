@@ -51,7 +51,7 @@ class Config:
 RAW_PATH = Path("EEG/eeg-data.csv")
 FULL_PATH = Path("EEG/eeg_data_with_features.csv")
 
-os.makedirs(f"outputs/results/{TIMESTAMP}", exist_ok=True)
+OUTPUT_DIR = Path(f"outputs/results/{TIMESTAMP}")
 ARCH_PATH = Path(f"outputs/results/{TIMESTAMP}/arch_{TIMESTAMP}.txt")
 CONFIG_PATH = Path(f"outputs/results/{TIMESTAMP}/config_{TIMESTAMP}.json")
 RESULTS_PATH = Path(f"outputs/results/{TIMESTAMP}/results_{TIMESTAMP}.txt")
