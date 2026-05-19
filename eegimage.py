@@ -113,6 +113,12 @@ class EEGClassifier():
         self.timestamp = TIMESTAMP
         self.disp = None
         self.cfg = cfg or Config()
+        # Build runtime device from cfg; CUDA_VISIBLE_DEVICES must already be set
+        # by the caller (main.py) before this point.
+        if torch.cuda.is_available():
+            self.device = torch.device(f"cuda:{self.cfg.device_id}")
+        else:
+            self.device = torch.device("cpu")
     
     class EEGCNN(nn.Module):
         def __init__(self, dropout_rate, in_channels=12, num_classes=9):
@@ -188,7 +194,7 @@ class EEGClassifier():
         num_classes = len(np.unique(y_train))
         counts = np.bincount(y_train, minlength=num_classes).astype(float)
         cw = torch.tensor(1.0 / np.maximum(counts, 1), dtype=torch.float32)
-        cw = (cw / cw.sum() * num_classes).to(DEVICE)
+        cw = (cw / cw.sum() * num_classes)  # keep on CPU; caller moves to correct device
         _bytes_per_batch = batch_size * 12 * scale * scale * 4
         print(f"\nSCALE={scale}  |  batch_size={batch_size}")
         print(f"Dataset RAM (8×8, both splits): {(X_train.nbytes + X_val.nbytes) / 1e6:.1f} MB")
@@ -200,9 +206,9 @@ class EEGClassifier():
     def build_model(self, input_channels, spatial_size, num_classes, cw, learning_rate, weight_decay, dropout_rate, 
                     config_path=CONFIG_PATH,
                     arch_path=ARCH_PATH):
-        self.model = self.EEGCNN(dropout_rate, in_channels=input_channels, num_classes=num_classes).to(DEVICE)
+        self.model = self.EEGCNN(dropout_rate, in_channels=input_channels, num_classes=num_classes).to(self.device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-        self.criterion = nn.CrossEntropyLoss(weight=cw)
+        self.criterion = nn.CrossEntropyLoss(weight=cw.to(self.device))
         self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
             self.optimizer, mode='max', factor=0.5, patience=5, min_lr=1e-5)
 

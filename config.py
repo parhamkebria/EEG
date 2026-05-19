@@ -30,9 +30,6 @@ if DUAL:
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 DEVICE_ID = 0 # only if cuda available, otherwise ignored
-if DEVICE.type == "cuda":
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(DEVICE_ID)
-    torch.cuda.set_device(DEVICE_ID)
 
 @dataclass
 class Config:

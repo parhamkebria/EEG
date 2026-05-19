@@ -1,6 +1,8 @@
+import os
+import torch
+from argparse import ArgumentParser
 import eegimage
 from config import *
-from argparse import ArgumentParser
 
 def run():
     parser = ArgumentParser(description="EEG Classification Training Script")
@@ -21,7 +23,13 @@ def run():
     parser.add_argument("--save", action='store_true', help="Save the confusion matrix plot.")
     
     args = parser.parse_args()
-    
+
+    # Set device before any CUDA call (CUDA is not yet initialised at this point
+    # since config.py and eegimage.py perform no CUDA operations at import time).
+    if torch.cuda.is_available():
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(args.device_id)
+        torch.cuda.set_device(args.device_id)
+
     if args.dual:
         args.scale = args.double_scale
         args.batch_size = args.double_batch_size
@@ -71,11 +79,11 @@ def run():
                         cfg.epochs,
                         cfg.learning_rate,
                         cfg.weight_decay,
-                        device=DEVICE)
+                        device=eeg_classifier.device)
     
     eeg_classifier.evaluate(eeg_model, 
                             val_loader,
-                            device=DEVICE,
+                            device=eeg_classifier.device,
                             le=le)
     
     if args.save:
