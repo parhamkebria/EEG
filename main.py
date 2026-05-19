@@ -48,6 +48,7 @@ def run():
     
     eeg_model = eeg_classifier.train(train_loader,
                         val_loader,
+                        num_classes,cw,
                         args.epochs,
                         args.learning_rate,
                         args.weight_decay,

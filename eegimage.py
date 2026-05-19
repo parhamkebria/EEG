@@ -50,19 +50,34 @@ def eegimage(data, raw_features, power_bands, fft_features):
         # Nonnegative (or nonpositive) data: min-max to [0, 1].
         return ((m - min_v) / (max_v - min_v)).astype(np.float32)
 
-    R_outer = normalize_matrix(np.outer(R_feat, R_feat))
-    R_dist  = normalize_matrix(np.abs(R_feat[:, :, None] - R_feat[:, None, :]))
-    P_outer = normalize_matrix(np.outer(P_feat, P_feat))
-    P_dist  = normalize_matrix(np.abs(P_feat[:, :, None] - P_feat[:, None, :]))
-    F_outer = normalize_matrix(np.outer(F_feat, F_feat))
-    F_dist  = normalize_matrix(np.abs(F_feat[:, :, None] - F_feat[:, None, :]))
-    
-    RF_outer = normalize_matrix(np.outer(R_feat, F_feat))
-    RF_dist  = normalize_matrix(np.abs(R_feat[:, :, None] - F_feat[:, None, :]))
-    PR_outer = normalize_matrix(np.outer(P_feat, R_feat))
-    PR_dist  = normalize_matrix(np.abs(P_feat[:, :, None] - R_feat[:, None, :]))
-    FP_outer = normalize_matrix(np.outer(F_feat, P_feat))
-    FP_dist  = normalize_matrix(np.abs(F_feat[:, :, None] - P_feat[:, None, :]))
+    def resize_batch_square(batch_mats, target_size):
+        """Resize a batch of 2D maps to (target_size, target_size)."""
+        t = torch.from_numpy(batch_mats).unsqueeze(1)  # (N, 1, H, W)
+        t = F.interpolate(t, size=(target_size, target_size), mode='bilinear', align_corners=False)
+        return t.squeeze(1).numpy().astype(np.float32)
+
+    def pairwise_outer(a, b):
+        return np.einsum('bi,bj->bij', a, b).astype(np.float32)
+
+    def pairwise_dist(a, b):
+        return np.abs(a[:, :, None] - b[:, None, :]).astype(np.float32)
+
+    # Keep the in-memory maps square and consistent across all channels.
+    target_size = len(raw_cols)
+
+    R_outer = resize_batch_square(normalize_matrix(pairwise_outer(R_feat, R_feat)), target_size)
+    R_dist  = resize_batch_square(normalize_matrix(pairwise_dist(R_feat, R_feat)), target_size)
+    P_outer = resize_batch_square(normalize_matrix(pairwise_outer(P_feat, P_feat)), target_size)
+    P_dist  = resize_batch_square(normalize_matrix(pairwise_dist(P_feat, P_feat)), target_size)
+    F_outer = resize_batch_square(normalize_matrix(pairwise_outer(F_feat, F_feat)), target_size)
+    F_dist  = resize_batch_square(normalize_matrix(pairwise_dist(F_feat, F_feat)), target_size)
+
+    RF_outer = resize_batch_square(normalize_matrix(pairwise_outer(R_feat, F_feat)), target_size)
+    RF_dist  = resize_batch_square(normalize_matrix(pairwise_dist(R_feat, F_feat)), target_size)
+    PR_outer = resize_batch_square(normalize_matrix(pairwise_outer(P_feat, R_feat)), target_size)
+    PR_dist  = resize_batch_square(normalize_matrix(pairwise_dist(P_feat, R_feat)), target_size)
+    FP_outer = resize_batch_square(normalize_matrix(pairwise_outer(F_feat, P_feat)), target_size)
+    FP_dist  = resize_batch_square(normalize_matrix(pairwise_dist(F_feat, P_feat)), target_size)
     
     X_img = np.stack([R_outer, R_dist, 
                     P_outer, P_dist, 
@@ -71,7 +86,7 @@ def eegimage(data, raw_features, power_bands, fft_features):
                     PR_outer, PR_dist,
                     FP_outer, FP_dist], axis=1)
     
-    print(f"\nIMAGINATOR tensor shape: {X_img.shape}\n")
+    print(f"\nEEGIMAGE tensor shape: {X_img.shape}\n")
     return X_img
 
 # Stores 8×8 arrays in RAM; upscales each sample on-the-fly in __getitem__.
@@ -94,6 +109,10 @@ class EEGMatrixDataset(Dataset):
 #####################################
 # The main EEG classifier class:
 class EEGClassifier():
+    def __init__(self):
+        self.timestamp = TIMESTAMP
+        self.disp = None
+    
     class EEGCNN(nn.Module):
         def __init__(self, dropout_rate, in_channels=12, num_classes=9):
             super().__init__()
@@ -108,12 +127,9 @@ class EEGClassifier():
                 nn.Linear(2, num_classes),
             )
             
-            self.timestamp = TIMESTAMP
-            self.disp = None
-
         def forward(self, x):
             return self.classifier(self.features(x))
-
+    
     @staticmethod
     def load_csv_data(csv_path: Path | None = None) -> pd.DataFrame:
         csv_path = csv_path or FULL_PATH
@@ -192,15 +208,16 @@ class EEGClassifier():
         print(f"\nTrainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad):,}")
         print(torchinfo.summary(self.model, input_size=(1, input_channels, spatial_size, spatial_size), verbose=0))
         # Save model configuration
-        self.save_config(config_path)
         with open(arch_path, 'w') as f:
             f.write(f"Trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad):,}")
-            f.write("\n" + torchinfo.summary(self.model, input_size=(1, input_channels, spatial_size, spatial_size), verbose=0).pformat())
-        print(f"\nModel architecture saved to {arch_path}")
+            f.write("\n" + str(torchinfo.summary(self.model, input_size=(1, input_channels, spatial_size, spatial_size), verbose=0)))
+            f.close()
+        self.save_config(config_path)
+        print(f"Model architecture saved to {arch_path}")
         print("-" * 20 + "Model built" + "-" * 20)
         return self.model, self.optimizer, self.criterion, self.scheduler
 
-    def train(self, train_loader, val_loader, epochs, learning_rate, weight_decay, device=DEVICE):
+    def train(self, train_loader, val_loader, num_classes, cw, epochs, learning_rate, weight_decay, device=DEVICE):
         
         self.history = {'train_loss': [], 'val_loss': [], 'train_f1': [], 'val_f1': []}
         input_channels = train_loader.dataset.X.shape[1]
@@ -209,8 +226,8 @@ class EEGClassifier():
         self.model, self.optimizer, self.criterion, self.scheduler = self.build_model(
             input_channels=input_channels,
             spatial_size=spatial_size,
-            num_classes=self.num_classes,
-            cw=self.cw,
+            num_classes=num_classes,
+            cw=cw,
             learning_rate=learning_rate,
             weight_decay=weight_decay,
             dropout_rate=0.5
@@ -288,7 +305,7 @@ class EEGClassifier():
                     f"TLoss: {tr_loss:.3f}  TF1: {tr_f1:.3f} | "
                     f"VLoss: {va_loss:.3f}  VF1: {va_f1:.3f} | "
                     f"LR: {self.optimizer.param_groups[0]['lr']:.2e} | "
-                    f"completed in {(time() - start_time):.1f} seconds.{tag}")
+                    f"completed in {(time() - start_time):.1f} seconds{tag}")
                 log_writer.writerow([epoch, tr_loss, tr_f1, va_loss, va_f1, self.optimizer.param_groups[0]['lr']])
                 log_file.flush()
 
@@ -323,12 +340,15 @@ class EEGClassifier():
         if le is not None:
             report_kwargs['target_names'] = le.classes_
         print(classification_report(va_targets, va_preds, **report_kwargs))
+        with open(RESULTS_PATH, 'w') as f:
+            f.write("Validation Classification Report\n")
+            f.write("-" * 30 + "\n")
+            f.write(classification_report(va_targets, va_preds, **report_kwargs))
+            f.close()
         _cm = confusion_matrix(va_targets, va_preds, normalize='true')
-        self.disp = ConfusionMatrixDisplay.from_predictions(confusion_matrix=_cm, 
-                                                            display_labels=le.classes_,
-                                                            xticks_rotation=90,
-                                                            values_format='.1f',
-                                                            cmap='Blues')
+        display_labels = le.classes_ if le is not None else None
+        self.disp = ConfusionMatrixDisplay(confusion_matrix=_cm, display_labels=display_labels)
+        self.disp.plot(xticks_rotation=90, values_format='.1f', cmap='Blues')
         print("-" * 20 + f"Evaluation completed in {(time() - start_time):.1f} seconds." + "-" * 20)
 
     def save_config(self, config_path: Path = CONFIG_PATH):
@@ -348,7 +368,7 @@ class EEGClassifier():
         }
         with open(config_path, 'w') as f:
             json.dump(config_data, f, indent=4)
-        print(f"\nConfig saved to {config_path}")
+        print(f"Config saved to {config_path}")
     
     def plot_results(self):
         epochs = range(1, len(self.history['train_loss']) + 1)

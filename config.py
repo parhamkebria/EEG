@@ -38,8 +38,10 @@ FULL_PATH = Path("EEG/eeg_data_with_features.csv")
 os.makedirs(f"outputs/results/{TIMESTAMP}", exist_ok=True)
 ARCH_PATH = Path(f"outputs/results/{TIMESTAMP}/arch_{TIMESTAMP}.txt")
 CONFIG_PATH = Path(f"outputs/results/{TIMESTAMP}/config_{TIMESTAMP}.json")
+RESULTS_PATH = Path(f"outputs/results/{TIMESTAMP}/results_{TIMESTAMP}.txt")
 LOGGING_PATH = Path(f"outputs/results/{TIMESTAMP}/training_log_{TIMESTAMP}.csv")
-CHECKPOINT_PATH = Path(f"outputs/results/{TIMESTAMP}/best_model_checkpoint_{TIMESTAMP}.pth")
+CHECKPOINT_PATH = Path(f"outputs/results/{TIMESTAMP}/best_model_{TIMESTAMP}.pth")
+
 
 POWER_BANDS = [
     'delta',
