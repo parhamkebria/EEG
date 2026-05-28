@@ -85,7 +85,7 @@ Why it matters: this distribution makes the long-tail label problem explicit and
 
 Why it matters: this example output shows the practical classification behavior of the developed model on the prepared feature pipeline.
 
-## IMAGINATION
+## IMAGINATION (EEGIMAGE)
 
 Imagination converts EEG raw values, statistical features, power bands, and Fourier transforms into visual representations. Then, trains a convolutional neural network to classify these images into mental states. The goal is to leverage spatial patterns in the data that may be more easily captured by CNNs:![Sample](sample.png)
 
