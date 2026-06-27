@@ -49,3 +49,17 @@ A curated list of popular public EEG datasets used as benchmarks in research (BC
 - Last updated: June 2026. Contributions welcome via PRs!
 
 This table can be expanded as needed.
+
+## Model Performance Benchmarks (Selected)
+
+**Note**: Numbers are approximate averages from recent papers (2024–2026). Always check original sources and MOABB for standardized results. Performance is highly subject-dependent.
+
+| Dataset | Task | Best Reported Accuracies (Recent SOTA) | Notes / Models | Source |
+|---------|------|---------------------------------------|----------------|--------|
+| BCI IV-2a | 4-class MI | ~85–86.5% (subject-dependent) | CIACNet, EEGEncoder, ATCNet variants | Recent papers (2025) |
+| BCI IV-2a | 4-class MI | ~70–80% | Traditional/Riemannian (MOABB) | MOABB benchmarks |
+| PhysioNet EEGMMIDB | Binary MI (e.g. left/right) | 82–89%+ | EEGNet Fusion, hybrids | Multiple studies |
+| PhysioNet EEGMMIDB | Multi-class | 60–80% | Varies by classes | MOABB & papers |
+| Various MI | Cross-subject | 65–75% | Harder setting | Common in literature |
+
+For full reproducible tables, see [MOABB Benchmark Results](https://moabb.neurotechx.com/docs/paper_results.html).
