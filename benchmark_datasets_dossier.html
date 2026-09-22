@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Beyond the Berkeley Set</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --paper:      #F2F5F7;
+    --surface:    #FFFFFF;
+    --surface-2:  #E9EEF2;
+    --ink:        #15202A;
+    --ink-2:      #48596A;
+    --ink-3:      #78889A;
+    --line:       #D7E0E7;
+    --line-soft:  #E6ECF1;
+    --accent:     #0E7264;
+    --accent-ink: #0A5A50;
+    --accent-soft:#DCEDE9;
+    --amber:      #9C6410;
+    --amber-soft: #F6EEDF;
+    --clay:       #A33C2E;
+    --clay-soft:  #F7E6E2;
+
+    --display: "Newsreader", "Iowan Old Style", Georgia, serif;
+    --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+    --measure: 68ch;
+    --pad: clamp(1.1rem, 4vw, 2.75rem);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #0E1418;
+      --surface:    #151D23;
+      --surface-2:  #1C262D;
+      --ink:        #E7EEF3;
+      --ink-2:      #A6B6C1;
+      --ink-3:      #73838F;
+      --line:       #26333B;
+      --line-soft:  #1E2830;
+      --accent:     #48C3AA;
+      --accent-ink: #6FD4BE;
+      --accent-soft:#11312C;
+      --amber:      #DFA84F;
+      --amber-soft: #2E2410;
+      --clay:       #E28271;
+      --clay-soft:  #33201C;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:      #0E1418;
+    --surface:    #151D23;
+    --surface-2:  #1C262D;
+    --ink:        #E7EEF3;
+    --ink-2:      #A6B6C1;
+    --ink-3:      #73838F;
+    --line:       #26333B;
+    --line-soft:  #1E2830;
+    --accent:     #48C3AA;
+    --accent-ink: #6FD4BE;
+    --accent-soft:#11312C;
+    --amber:      #DFA84F;
+    --amber-soft: #2E2410;
+    --clay:       #E28271;
+    --clay-soft:  #33201C;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16.5px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 var(--pad) 5rem;
+  }
+
+  .col { max-width: var(--measure); }
+
+  p { margin: 0 0 1rem; color: var(--ink-2); }
+  p strong { color: var(--ink); font-weight: 600; }
+  a { color: var(--accent-ink); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0;
+  }
+
+  /* ---------- masthead ---------- */
+
+  header.masthead {
+    border-bottom: 1px solid var(--line);
+    padding: clamp(2.5rem, 7vw, 4.5rem) 0 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: clamp(2.3rem, 6vw, 3.9rem);
+    line-height: 1.02;
+    letter-spacing: -0.018em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent-ink);
+  }
+
+  .standfirst {
+    font-family: var(--display);
+    font-size: clamp(1.05rem, 2.2vw, 1.28rem);
+    line-height: 1.5;
+    color: var(--ink-2);
+    max-width: 60ch;
+    margin: 0;
+  }
+
+  .meta-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    color: var(--ink-3);
+    padding-top: 0.4rem;
+  }
+  .meta-strip span b { color: var(--ink-2); font-weight: 500; }
+
+  /* ---------- sections ---------- */
+
+  section { padding-top: clamp(2.75rem, 6vw, 4.25rem); }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: clamp(1.6rem, 3.4vw, 2.15rem);
+    line-height: 1.14;
+    letter-spacing: -0.012em;
+    margin: 0.5rem 0 0.9rem;
+    text-wrap: balance;
+  }
+
+  h3 {
+    font-family: var(--body);
+    font-weight: 600;
+    font-size: 1.02rem;
+    letter-spacing: -0.005em;
+    margin: 0 0 0.35rem;
+    color: var(--ink);
+  }
+
+  .rule {
+    height: 1px;
+    background: var(--line);
+    border: 0;
+    margin: 0;
+  }
+
+  /* ---------- tier legend ---------- */
+
+  .tiers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin-top: 1.75rem;
+  }
+
+  .tier {
+    background: var(--surface);
+    padding: 1.15rem 1.25rem 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .tier .k {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+  }
+  .tier p { margin: 0; font-size: 0.9rem; line-height: 1.5; }
+
+  /* ---------- tables ---------- */
+
+  .scroller {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    margin-top: 1.5rem;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 880px;
+    font-size: 0.86rem;
+  }
+
+  thead th {
+    text-align: left;
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 0.67rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 0.85rem 0.9rem;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+    background: var(--surface);
+  }
+
+  tbody td {
+    padding: 0.72rem 0.9rem;
+    border-bottom: 1px solid var(--line-soft);
+    color: var(--ink-2);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover td { background: var(--surface-2); }
+
+  td.name { color: var(--ink); font-weight: 600; white-space: nowrap; }
+  td.num, td.spec {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.79rem;
+    white-space: nowrap;
+  }
+
+  .chip {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    padding: 0.16rem 0.42rem;
+    border: 1px solid var(--line);
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+  .chip.a { color: var(--accent-ink); border-color: var(--accent); background: var(--accent-soft); }
+  .chip.b { color: var(--amber); border-color: var(--amber); background: var(--amber-soft); }
+  .chip.c { color: var(--clay); border-color: var(--clay); background: var(--clay-soft); }
+
+  /* ---------- dataset cards ---------- */
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin-top: 1.5rem;
+  }
+
+  .card {
+    background: var(--surface);
+    padding: 1.3rem 1.35rem 1.45rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .card .top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .card p { font-size: 0.9rem; line-height: 1.55; margin: 0; }
+
+  .specline {
+    font-family: var(--mono);
+    font-size: 0.735rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    padding: 0.5rem 0.6rem;
+    background: var(--surface-2);
+    border-left: 2px solid var(--accent);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .card dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.28rem 0.85rem;
+    font-size: 0.83rem;
+  }
+  .card dt {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding-top: 0.22rem;
+  }
+  .card dd { margin: 0; color: var(--ink-2); }
+
+  /* ---------- callouts ---------- */
+
+  .note {
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--amber);
+    background: var(--surface);
+    padding: 1.05rem 1.2rem;
+    margin-top: 1.4rem;
+  }
+  .note.risk { border-left-color: var(--clay); }
+  .note .k {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--amber);
+    display: block;
+    margin-bottom: 0.35rem;
+  }
+  .note.risk .k { color: var(--clay); }
+  .note p { margin: 0; font-size: 0.92rem; }
+  .note p + p { margin-top: 0.6rem; }
+
+  /* ---------- phased plan ---------- */
+
+  .plan {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1.5rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  .phase {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    gap: 0 1.25rem;
+    padding: 1.15rem 1.3rem;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .phase:last-child { border-bottom: 0; }
+
+  .phase .step {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    padding-top: 0.2rem;
+  }
+  .phase p { margin: 0.25rem 0 0; font-size: 0.9rem; }
+  .phase .sets {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    color: var(--ink-3);
+    margin-top: 0.45rem;
+    display: block;
+  }
+
+  @media (max-width: 560px) {
+    .phase { grid-template-columns: 1fr; gap: 0.35rem; }
+  }
+
+  ul.tight { margin: 0.4rem 0 1rem; padding-left: 1.1rem; color: var(--ink-2); }
+  ul.tight li { margin-bottom: 0.32rem; font-size: 0.93rem; }
+  ul.tight li::marker { color: var(--ink-3); }
+
+  footer {
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.85rem;
+    color: var(--ink-3);
+  }
+  footer h3 { font-size: 0.9rem; margin-bottom: 0.6rem; }
+  footer ul { padding-left: 1.1rem; margin: 0; }
+  footer li { margin-bottom: 0.3rem; }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Dataset survey · EEG classification · August 2026</p>
+    <h1>Where <em>EEGIMAGE</em> goes after Berkeley</h1>
+    <p class="standfirst">Sixteen publicly available EEG datasets that recent papers actually benchmark on — chosen so that your feature-image + CNN framework can be compared against published numbers rather than re-implemented baselines.</p>
+    <div class="meta-strip">
+      <span><b>Current benchmark:</b> Berkeley Synchronized Brainwave · 1 channel · ~30 subjects</span>
+      <span><b>Prepared for:</b> journal submission</span>
+    </div>
+  </header>
+
+  <section>
+    <p class="eyebrow">The framing problem</p>
+    <h2>What counts as "the same task"</h2>
+    <div class="col">
+      <p>The Berkeley set is a single-channel consumer recording labelled by <em>stimulus condition</em> — blink, math, music, video, colour, think-of-an-object. That paradigm has essentially no modern successor with a competitive literature, which is why there is nobody to compare against. No reviewer will accept "state of the art" on it.</p>
+      <p>EEGIMAGE, though, is not tied to that paradigm. It renders raw values, statistics, band powers and spectra into 2D arrays and classifies them with a CNN — a <strong>generic trial-to-label encoder</strong>. That means the right move is not to find one Berkeley replacement, but to enter three arenas that each carry their own published leaderboard.</p>
+    </div>
+
+    <div class="tiers">
+      <div class="tier">
+        <span class="k">Arena A — where the numbers are</span>
+        <p>The 12-dataset suite used by EEG foundation-model papers (LaBraM, BIOT, CBraMod). Same splits, same metrics, ready-made comparison table against EEGNet and EEG-Conformer.</p>
+      </div>
+      <div class="tier">
+        <span class="k">Arena B — where the protocol is</span>
+        <p>MOABB motor-imagery datasets. A maintained Python benchmark with fixed within/cross-session evaluation and a public ranking of ~30 pipelines.</p>
+      </div>
+      <div class="tier">
+        <span class="k">Arena C — where the name fits</span>
+        <p>Visual perception and mental-imagery EEG. Directly justifies the "IMAGINATION / EEGIMAGE" framing, and it is the fastest-moving corner of the field.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">At a glance</p>
+    <h2>The sixteen candidates</h2>
+    <div class="col">
+      <p>Sorted by arena. "Compared against" names the models that already report numbers on that dataset — the ones your table will sit beside.</p>
+    </div>
+
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr>
+            <th>Dataset</th>
+            <th>Arena</th>
+            <th>Paradigm / labels</th>
+            <th>Subj.</th>
+            <th>Ch.</th>
+            <th>Rate</th>
+            <th>Classes</th>
+            <th>Access</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="name">FACED</td><td><span class="chip a">A</span></td><td>Emotion, 28 video clips</td><td class="num">123</td><td class="num">32</td><td class="num">250 Hz</td><td class="num">9 / 2</td><td>Synapse, CC BY 4.0</td></tr>
+          <tr><td class="name">SEED-V</td><td><span class="chip a">A</span></td><td>Emotion, film clips + eye tracking</td><td class="num">16</td><td class="num">62</td><td class="num">1000 Hz</td><td class="num">5</td><td>SJTU application</td></tr>
+          <tr><td class="name">PhysioNet-MI</td><td><span class="chip a">A</span> <span class="chip b">B</span></td><td>Motor imagery + execution</td><td class="num">109</td><td class="num">64</td><td class="num">160 Hz</td><td class="num">4</td><td>PhysioNet, open</td></tr>
+          <tr><td class="name">SHU-MI</td><td><span class="chip a">A</span></td><td>Motor imagery, left/right hand</td><td class="num">25</td><td class="num">32</td><td class="num">250 Hz</td><td class="num">2</td><td>Open (figshare)</td></tr>
+          <tr><td class="name">TUEV</td><td><span class="chip a">A</span></td><td>Clinical EEG events (spikes, GPED…)</td><td class="num">—</td><td class="num">16*</td><td class="num">250 Hz*</td><td class="num">6</td><td>TUH form + rsync</td></tr>
+          <tr><td class="name">TUAB</td><td><span class="chip a">A</span></td><td>Normal vs abnormal recording</td><td class="num">—</td><td class="num">16*</td><td class="num">250 Hz*</td><td class="num">2</td><td>TUH form + rsync</td></tr>
+          <tr><td class="name">Mumtaz2016</td><td><span class="chip a">A</span></td><td>Major depressive disorder vs control</td><td class="num">—</td><td class="num">19</td><td class="num">256 Hz</td><td class="num">2</td><td>figshare, open</td></tr>
+          <tr><td class="name">MentalArithmetic</td><td><span class="chip a">A</span></td><td>Arithmetic workload vs rest</td><td class="num">36</td><td class="num">20</td><td class="num">500 Hz</td><td class="num">2</td><td>PhysioNet, open</td></tr>
+          <tr><td class="name">BNCI2014-001</td><td><span class="chip b">B</span></td><td>Motor imagery (BCI Comp. IV-2a)</td><td class="num">9</td><td class="num">22</td><td class="num">250 Hz</td><td class="num">4</td><td>MOABB, open</td></tr>
+          <tr><td class="name">Cho2017</td><td><span class="chip b">B</span></td><td>Motor imagery, left/right hand</td><td class="num">52</td><td class="num">64</td><td class="num">512 Hz</td><td class="num">2</td><td>MOABB / GigaDB</td></tr>
+          <tr><td class="name">Lee2019-MI</td><td><span class="chip b">B</span></td><td>Motor imagery, 2 sessions</td><td class="num">54</td><td class="num">62</td><td class="num">1000 Hz</td><td class="num">2</td><td>MOABB / GigaDB</td></tr>
+          <tr><td class="name">Dreyer2023</td><td><span class="chip b">B</span></td><td>Motor imagery + user profiles</td><td class="num">87</td><td class="num">27</td><td class="num">512 Hz</td><td class="num">2</td><td>Zenodo, open</td></tr>
+          <tr><td class="name">THINGS-EEG2</td><td><span class="chip c">C</span></td><td>Natural image viewing (RSVP)</td><td class="num">10</td><td class="num">63</td><td class="num">1000 Hz</td><td class="num">200-way</td><td>OSF, open</td></tr>
+          <tr><td class="name">THINGS-EEG1</td><td><span class="chip c">C</span></td><td>1,854 object concepts (RSVP)</td><td class="num">50</td><td class="num">64</td><td class="num">1000 Hz</td><td class="num">1854</td><td>OpenNeuro, CC BY</td></tr>
+          <tr><td class="name">EEG-ImageNet</td><td><span class="chip c">C</span></td><td>ImageNet-21k stimuli, multi-granularity</td><td class="num">16</td><td class="num">62</td><td class="num">1000 Hz</td><td class="num">80 / 40 / 8</td><td>GitHub, open</td></tr>
+          <tr><td class="name">Visual Imagery BCI</td><td><span class="chip c">C</span></td><td>Imagined figures, animals, objects</td><td class="num">22</td><td class="num">32</td><td class="num">1000 Hz</td><td class="num">10</td><td>figshare, CC BY-NC-ND</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:0.78rem; color:var(--ink-3); margin-top:0.7rem; font-family:var(--mono);">* TUH channel count and rate as harmonised by the LaBraM / CBraMod preprocessing, not the raw clinical recordings.</p>
+  </section>
+
+  <hr class="rule" style="margin-top:3.5rem;">
+
+  <section>
+    <p class="eyebrow">Arena A</p>
+    <h2>The foundation-model benchmark suite</h2>
+    <div class="col">
+      <p>This is the highest-value target. CBraMod (ICLR 2025) and LaBraM (ICLR 2024) both evaluate on the same twelve datasets with the same protocol and the same three metrics — <strong>balanced accuracy, Cohen's κ, weighted F1</strong>. Reproduce that protocol and your results table writes itself: EEGNet, EEG-Conformer, BIOT, LaBraM and CBraMod are already in the column beside you, and the κ / weighted-F1 pair is exactly the right answer to the class-imbalance problem your repo already flags.</p>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="top"><h3>FACED</h3><span class="chip">Emotion · 9-class</span></div>
+        <div class="specline">123 subj · 32 ch · 250 Hz · 10,332 samples · 28 clips · 9 emotions</div>
+        <p>The best single replacement for Berkeley: large subject pool, consumer-plausible 32-channel montage, and a hard fine-grained label set. Original paper reports 9-class cross-subject 35.2% (DE+SVM) and 42.4% (CLISA).</p>
+        <dl>
+          <dt>Beat this</dt><dd>EEGNet 0.409 · LaBraM 0.527 · CBraMod 0.551 balanced acc.</dd>
+          <dt>Get it</dt><dd><a href="https://doi.org/10.7303/syn50614194">Synapse syn50614194</a> — CC BY 4.0, no gatekeeping</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="top"><h3>PhysioNet-MI (EEGMMIDB)</h3><span class="chip">Motor imagery · 4-class</span></div>
+        <div class="specline">109 subj · 64 ch · 160 Hz · 9,837 samples · 4 classes</div>
+        <p>The most-cited open motor-imagery corpus and the largest by subject count. Doubles as an Arena B entry, so one preprocessing pipeline serves two comparison tables.</p>
+        <dl>
+          <dt>Beat this</dt><dd>EEGNet 0.581 · LaBraM 0.617 · CBraMod 0.642 balanced acc.</dd>
+          <dt>Get it</dt><dd><a href="https://physionet.org/content/eegmmidb/1.0.0/">physionet.org/content/eegmmidb</a> — open</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="top"><h3>TUAB &amp; TUEV</h3><span class="chip">Clinical · 2 / 6-class</span></div>
+        <div class="specline">TUAB 409,455 samples · TUEV 112,491 samples · 16 ch · 250 Hz</div>
+        <p>Clinical scale is what makes a method look serious to a general-neuroengineering audience. Big enough that a CNN on rendered features is a fair fight, and the label sets (normal/abnormal; six event types) are unambiguous.</p>
+        <dl>
+          <dt>Watch out</dt><dd>Access needs a signed registration form and rsync; allow a week</dd>
+          <dt>Get it</dt><dd><a href="https://isip.piconepress.com/projects/nedc/html/tuh_eeg/">TUH EEG Corpus</a> — TUAB v3.0.1, TUEV v2.0.1</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="top"><h3>SEED-V</h3><span class="chip">Emotion · 5-class</span></div>
+        <div class="specline">16 subj · 62 ch · 1000 Hz · 117,744 samples · 5 emotions</div>
+        <p>The reference emotion benchmark of the last decade — reviewers in affective computing expect it. Smaller subject pool than FACED, but a much deeper per-subject recording.</p>
+        <dl>
+          <dt>Beat this</dt><dd>EEGNet 0.296 · LaBraM 0.398 · CBraMod 0.409 balanced acc.</dd>
+          <dt>Get it</dt><dd><a href="https://bcmi.sjtu.edu.cn/home/seed/">SJTU BCMI</a> — application form, academic use</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="top"><h3>MentalArithmetic</h3><span class="chip">Workload · 2-class</span></div>
+        <div class="specline">36 subj · 20 ch · 500 Hz · 1,707 samples · rest vs count</div>
+        <p>The closest thing in the suite to Berkeley's "do mental math" condition — a direct continuity argument for your existing results, at a tenth of the noise.</p>
+        <dl>
+          <dt>Note</dt><dd>Small; use it as a supporting row, not a headline</dd>
+          <dt>Get it</dt><dd><a href="https://physionet.org/content/eegmat/1.0.0/">PhysioNet EEGMAT</a> — open</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="top"><h3>Rest of the suite</h3><span class="chip">Optional rows</span></div>
+        <div class="specline">SHU-MI · ISRUC · CHB-MIT · BCIC2020-3 · Mumtaz2016 · SEED-VIG</div>
+        <p>Sleep staging, seizure detection, imagined speech, depression screening and vigilance regression. Each adds a row with zero new baseline work — worth it if you want the "generalises across paradigms" claim to carry weight.</p>
+        <dl>
+          <dt>Use when</dt><dd>Reviewer asks whether the encoding is paradigm-specific</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Arena B</p>
+    <h2>MOABB, for a protocol you don't have to defend</h2>
+    <div class="col">
+      <p>MOABB (Mother of All BCI Benchmarks) is a maintained Python library wrapping 160+ datasets behind one interface, with fixed within-session, cross-session and cross-subject evaluations and a published ranking of standard pipelines (CSP+LDA, FBCSP, Riemannian tangent space, EEGNet, ShallowConvNet). Plugging EEGIMAGE in as a pipeline object gives you a comparison that a reviewer cannot accuse of favourable splitting — the splits aren't yours.</p>
+      <p>Four datasets carry the paradigm well: <strong>BNCI2014-001</strong> (BCI Competition IV-2a; 9 subjects, 22 channels, 4 classes, 2 sessions — the field's default sanity check), <strong>Cho2017</strong> (52 subjects, 64 channels), <strong>Lee2019-MI</strong> (54 subjects, 62 channels, 2 sessions, 11,000 trials) and <strong>Dreyer2023</strong> (87 subjects, 27 channels, ~240 trials each, plus personality and cognitive profiles — mean online accuracy 63.4% ± 17.4, with over half the cohort at chance).</p>
+      <p>Dreyer2023 is the interesting one for your subject-shift problem: it ships user profile data, so "which subjects does the model fail on, and why" becomes an analysable question rather than a limitation paragraph.</p>
+    </div>
+    <div class="note">
+      <span class="k">Cheap win</span>
+      <p>MOABB's Lee2019 and Cho2017 loaders download and epoch the data for you. Getting all four datasets running is roughly a day of work, and it produces the single most defensible table in the paper.</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Arena C</p>
+    <h2>Visual perception and imagery — the name-fit datasets</h2>
+    <div class="col">
+      <p>If the framework is called IMAGINATION / EEGIMAGE, a reviewer will look for imagery data. This corner also has the newest releases and the loudest 2024–2026 literature, which is where citations come from.</p>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="top"><h3>THINGS-EEG2 (Gifford 2022)</h3><span class="chip">Perception · zero-shot</span></div>
+        <div class="specline">10 subj · 63 ch · 1000 Hz · train 1654×10×4 · test 200×1×80</div>
+        <p>The default benchmark for EEG visual decoding. Evaluation is 200-way zero-shot retrieval, so it tests representation quality rather than closed-set classification — a genuinely different claim from your current one.</p>
+        <dl>
+          <dt>Beat this</dt><dd>BraVL 5.8/17.5 · NICE (ICLR'24) 13.8/39.5 top-1/top-5</dd>
+          <dt>Get it</dt><dd><a href="https://osf.io/3jk45/">OSF 3jk45</a> — raw + preprocessed, open</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="top"><h3>Visual Imagery BCI (Sci Data 2026)</h3><span class="chip">Imagery · 10-class</span></div>
+        <div class="specline">22 subj · 2 sessions · 32 ch · 1000 Hz · 4 s trials · 10 classes</div>
+        <p>The closest dataset in existence to what your framework's name promises: pure imagery, no stimulus on screen, three semantic groups (figures / animals / objects). Two sessions per subject means you can report cross-session as well as cross-subject.</p>
+        <dl>
+          <dt>Beat this</dt><dd>EEGNet 75.8% (animals) · 75.1% (figures) · 62.0% (objects)</dd>
+          <dt>Get it</dt><dd><a href="https://doi.org/10.6084/m9.figshare.30227503">figshare 30227503</a> — CC BY-NC-ND</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="top"><h3>EEG-ImageNet (2024)</h3><span class="chip">Perception · 80/40/8-class</span></div>
+        <div class="specline">16 subj · 62 ch · 1000 Hz · 4,000 images · 63,850 pairs · 0.5 s trials</div>
+        <p>Multi-granularity labels are the draw: the same trials support an 80-way, a 40-way coarse and an 8-way fine task, so you get three difficulty points from one preprocessing pass.</p>
+        <dl>
+          <dt>Beat this</dt><dd>80-class 40.5% (RGNN) · 40-class 53.4% · 8-class 81.6% (MLP)</dd>
+          <dt>Get it</dt><dd><a href="https://github.com/Promise-Z5Q2SQ/EEG-ImageNet-Dataset">GitHub</a> — 15.9 GB, PyTorch tensors</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="top"><h3>THINGS-EEG1 (Grootswagers 2022)</h3><span class="chip">Perception · 1,854 concepts</span></div>
+        <div class="specline">50 subj · 64 ch · 1000 Hz · 22,248 images · 10 Hz RSVP</div>
+        <p>Fifty subjects makes it the best cross-subject generalisation test in the visual family, though each image is seen only once — better for representational analysis than for per-trial classification.</p>
+        <dl>
+          <dt>Get it</dt><dd><a href="https://doi.org/10.18112/openneuro.ds003825.v1.1.0">OpenNeuro ds003825</a> — BIDS, CC BY 4.0</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="top"><h3>Alljoined-1.6M (2025)</h3><span class="chip">Perception · consumer rig</span></div>
+        <div class="specline">20 subj · 32 ch consumer · 1.6M trials · ~2.7× THINGS-EEG2</div>
+        <p>Explicitly built to ask whether affordable hardware can support semantic decoding — the same question your Berkeley work implicitly asks, but with a modern design and a scaling curve.</p>
+        <dl>
+          <dt>Get it</dt><dd><a href="https://arxiv.org/abs/2508.18571">arXiv 2508.18571</a> — CC BY-NC-ND 4.0</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="top"><h3>MindBigData 2022</h3><span class="chip">Berkeley continuity</span></div>
+        <div class="specline">MindWave 1 ch · Insight 5 ch · EPOC 14 ch · Muse 4–5 ch · Cap64 64 ch</div>
+        <p>The one dataset that keeps your single-channel result alive: same class of consumer headsets as Berkeley, but millions of trials and digit/image stimuli. Use it to show the method degrades gracefully as channels drop, not as a headline benchmark.</p>
+        <dl>
+          <dt>Get it</dt><dd><a href="https://huggingface.co/datasets/DavidVivancos/MindBigData2022">Hugging Face</a> · <a href="https://arxiv.org/abs/2212.14746">arXiv 2212.14746</a></dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="note risk">
+      <span class="k">Do not use uncritically — block-design leakage</span>
+      <p>The 2017 Spampinato "EEG-ImageNet" 40-class dataset (the one behind many 90%+ accuracy claims) presented all images of a class in one contiguous block. Li et al., <em>The Perils and Pitfalls of Block Design for EEG Classification Experiments</em> (TPAMI 2021), showed those accuracies collapse to near chance under randomised presentation, and Ahmed &amp; Wilbur (CVPR 2021) replicated the finding. Any paper that cites those numbers as a baseline in 2026 will be desk-checked.</p>
+      <p>The same caution applies in weaker form to <strong>EEG-ImageNet (2024)</strong>: images are grouped by category and the official split takes the first 30 images of each category for training and the last 20 for test, so trials adjacent in time land on opposite sides of the split. If you use it, report a temporally-blocked split alongside the official one and say so explicitly.</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Also worth knowing</p>
+    <h2>Two datasets that are about to matter</h2>
+    <div class="col">
+      <p><strong>HBN-EEG</strong> — the Healthy Brain Network release used for the NeurIPS 2025 EEG Foundation Challenge: over 3,000 participants across 11 releases, six tasks (resting state, surround suppression, movie watching, contrast change detection, sequence learning, symbol search), downsampled to 100 Hz, fully BIDS, with response time, demographics and psychopathology factor scores as targets. It is the largest open, task-labelled EEG corpus available, and cross-subject generalisation is the explicit challenge. Data: <code>s3://nmdatasets/NeurIPS2025/</code> and the <a href="https://eeg2025.github.io/data/">challenge data page</a>.</p>
+      <p><strong>ERP CORE</strong> — 40 participants, six optimised paradigms yielding seven ERP components (N170, MMN, N2pc, N400, P3, LRP, ERN), with full scripts and processing pipelines. Not a classification benchmark, but the standard reference for showing that a representation preserves known neural components. A single figure using it buys a lot of neuroscientific credibility. Available via <a href="https://erpinfo.org/erp-core">erpinfo.org/erp-core</a>.</p>
+    </div>
+  </section>
+
+  <hr class="rule" style="margin-top:3.5rem;">
+
+  <section>
+    <p class="eyebrow">Recommendation</p>
+    <h2>A four-phase evaluation plan</h2>
+    <div class="col">
+      <p>Ordered by return per unit of effort. Phases 1 and 2 alone are enough for a solid journal submission; 3 and 4 are what make the paper feel like it belongs to the imagery literature.</p>
+    </div>
+
+    <div class="plan">
+      <div class="phase">
+        <span class="step">Phase 1</span>
+        <div>
+          <h3>Adopt the foundation-model protocol</h3>
+          <p>Rebuild the pipeline against the LaBraM / CBraMod preprocessing and report balanced accuracy, Cohen's κ and weighted F1. This is the single change that converts your work from "an approach" into "an approach with a comparison table."</p>
+          <span class="sets">FACED · PhysioNet-MI · TUEV · TUAB</span>
+        </div>
+      </div>
+      <div class="phase">
+        <span class="step">Phase 2</span>
+        <div>
+          <h3>Wrap EEGIMAGE as a MOABB pipeline</h3>
+          <p>Run the library's standard within-session and cross-subject evaluations. Splits, preprocessing and statistics come from the library, so the comparison against CSP+LDA, FBCSP, Riemannian and EEGNet is unarguable.</p>
+          <span class="sets">BNCI2014-001 · Cho2017 · Lee2019-MI · Dreyer2023</span>
+        </div>
+      </div>
+      <div class="phase">
+        <span class="step">Phase 3</span>
+        <div>
+          <h3>Earn the name</h3>
+          <p>One perception benchmark and one true imagery benchmark. The imagery dataset has published EEGNet baselines and two sessions per subject, so it supports both the cross-subject and cross-session claims in one table.</p>
+          <span class="sets">Visual Imagery BCI (Sci Data) · THINGS-EEG2</span>
+        </div>
+      </div>
+      <div class="phase">
+        <span class="step">Phase 4</span>
+        <div>
+          <h3>Close the loop on Berkeley</h3>
+          <p>Keep the original result as a low-channel ablation rather than a headline: show accuracy as a function of channel count from 64 down to 1, using MindBigData's device families. That turns your dataset's weakness into a stated contribution.</p>
+          <span class="sets">MindBigData 2022 · Berkeley Synchronized Brainwave</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <span class="k">Methodological checklist for the paper</span>
+      <p>Keep the subject-aware split you already have, but state it as leave-one-subject-out or a fixed subject-disjoint split, and report per-subject variance — cross-subject means hide enormous spread (Dreyer2023: 40% to 99% on a binary task).</p>
+      <p>Fit every normalisation, channel-wise scaling and feature-image colour mapping on training subjects only. A per-trial rendering step that touches global statistics is a leakage path reviewers now look for.</p>
+      <p>Report against baselines you did not tune yourself wherever the dataset has published numbers, and re-run at least one baseline (EEGNet is the conventional choice) inside your own pipeline to show the harness is fair.</p>
+    </div>
+  </section>
+
+  <footer>
+    <h3>Sources</h3>
+    <ul>
+      <li><a href="https://www.nature.com/articles/s41597-023-02650-w">FACED: A Large Finer-grained Affective Computing EEG Dataset</a> — Scientific Data, 2023</li>
+      <li><a href="https://proceedings.iclr.cc/paper_files/paper/2025/file/bbbd6d915cb90be21c1254a82d45cedd-Paper-Conference.pdf">CBraMod: A Criss-Cross Brain Foundation Model for EEG Decoding</a> — ICLR 2025 (dataset suite and baseline results)</li>
+      <li><a href="https://openreview.net/pdf?id=QzTpTRVtrP">LaBraM: Large Brain Model for Learning Generic Representations</a> — ICLR 2024</li>
+      <li><a href="https://moabb.neurotechx.com/docs/dataset_summary.html">MOABB dataset summary</a> and <a href="https://moabb.neurotechx.com/docs/generated/moabb.datasets.Lee2019_MI.html">Lee2019_MI</a></li>
+      <li><a href="https://www.nature.com/articles/s41597-023-02445-z">Dreyer et al., A large EEG database with users' profile information for motor imagery BCI</a> — Scientific Data, 2023</li>
+      <li><a href="https://proceedings.iclr.cc/paper_files/paper/2024/file/d0865cbe51d35ec322f9af9db7806fc7-Paper-Conference.pdf">NICE: Decoding Natural Images from EEG</a> — ICLR 2024 (THINGS-EEG2 specs and zero-shot baselines)</li>
+      <li><a href="https://pure.mpg.de/rest/items/item_3364950_1/component/file_3364951/content">Grootswagers et al., Human EEG recordings for 1,854 concepts (THINGS-EEG1)</a> — Scientific Data, 2022</li>
+      <li><a href="https://arxiv.org/html/2406.07151v1">EEG-ImageNet: Dataset and Benchmarks with Multi-Granularity Labels</a> — 2024</li>
+      <li><a href="https://www.nature.com/articles/s41597-025-06512-5">An EEG Dataset for Visual Imagery-Based Brain–Computer Interface</a> — Scientific Data</li>
+      <li><a href="https://www.nature.com/articles/s41597-023-02287-9">EEG-based BCI Dataset of Semantic Concepts for Imagination and Perception Tasks</a> — Scientific Data, 2023</li>
+      <li><a href="https://arxiv.org/abs/2508.18571">Alljoined-1.6M: A Million-Trial EEG-Image Dataset</a> — 2025</li>
+      <li><a href="https://engineering.purdue.edu/~qobi/papers/tpami2021.pdf">Li et al., The Perils and Pitfalls of Block Design for EEG Classification Experiments</a> — TPAMI 2021</li>
+      <li><a href="https://openaccess.thecvf.com/content/CVPR2021/papers/Ahmed_Object_Classification_From_Randomized_EEG_Trials_CVPR_2021_paper.pdf">Ahmed &amp; Wilbur, Object Classification from Randomized EEG Trials</a> — CVPR 2021</li>
+      <li><a href="https://isip.piconepress.com/projects/nedc/html/tuh_eeg/">TUH EEG Corpus</a> · <a href="https://bcmi.sjtu.edu.cn/home/seed/">SEED datasets</a> · <a href="https://eeg2025.github.io/data/">HBN-EEG / EEG 2025 Challenge</a> · <a href="https://huggingface.co/datasets/DavidVivancos/MindBigData2022">MindBigData 2022</a></li>
+    </ul>
+  </footer>
+
+</div>
+
+</body>
+</html>
