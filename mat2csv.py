@@ -1,3 +1,4 @@
+import sys
 import ast
 import scipy.io
 import numpy as np
@@ -48,3 +49,10 @@ def mat2csv(path):
 
 # path = "<path to the .mat file>"
 # mat2csv(path)
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python mat2csv.py <path to the .mat file>")
+        sys.exit(1)
+    path = sys.argv[1]
+    mat2csv(path)
